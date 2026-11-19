@@ -1,0 +1,13 @@
+# Phase 1 baseline (placeholder; read by scripts/train_emg.py once it exists)
+dataset: ninapro_db2
+exercises: [E1]          # start small, extend later
+fs_hz: 2000
+filter:
+  bandpass_hz: [20, 450]
+  notch_hz: 50
+window:
+  length_ms: 200
+  step_ms: 50
+features: [rms, mav, wl]
+classifier: lda           # lda | svm
+split: leave_one_subject_out

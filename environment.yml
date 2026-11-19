@@ -1,0 +1,17 @@
+# conda env create -f environment.yml && conda activate hand && pip install -e ".[dev]"
+name: hand
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - scipy
+  - scikit-learn
+  - pandas
+  - matplotlib
+  - jupyterlab
+  - pip
+  - pip:
+      - mujoco>=3.1
+      # The PyPI wheel includes Apple-silicon MPS support; no CUDA build needed on a Mac.
+      - torch

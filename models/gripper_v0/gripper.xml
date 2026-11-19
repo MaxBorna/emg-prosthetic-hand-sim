@@ -1,0 +1,88 @@
+<!--
+  gripper_v0: minimal underactuated two-finger gripper.
+  One position actuator pulls a fixed tendon that couples all four finger
+  joints (2 per finger). Joint springs decide how the single actuator's motion
+  is distributed between proximal and distal links, which is the defining
+  property of an underactuated (tendon-driven) hand.
+-->
+<mujoco model="gripper_v0">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81" cone="elliptic" impratio="10"/>
+
+  <default>
+    <geom friction="1.5 0.02 0.001" condim="4" solref="0.005 1"/>
+    <default class="finger">
+      <joint type="hinge" range="0 1.3" stiffness="0.02" damping="0.01" armature="0.001" springref="0"/>
+      <default class="distal">
+        <!-- Stiffer distal spring: the proximal link moves first, the distal link
+             curls once the proximal is blocked by contact. -->
+        <joint stiffness="0.08"/>
+      </default>
+      <geom type="capsule" size="0.01" rgba="0.85 0.55 0.25 1" mass="0.02"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.2 0.25 0.3" rgb2="0.3 0.35 0.4" width="256" height="256"/>
+    <material name="grid" texture="grid" texrepeat="8 8"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 -0.5 1" dir="0 0.5 -1"/>
+    <geom name="floor" type="plane" size="1 1 0.05" material="grid"/>
+
+    <!-- Palm: moves vertically on a slide joint (the "arm"). -->
+    <body name="palm" pos="0 0 0.15">
+      <joint name="lift" type="slide" axis="0 0 1" range="-0.05 0.3" damping="5"/>
+      <geom name="palm" type="box" size="0.09 0.02 0.01" rgba="0.3 0.3 0.35 1" mass="0.2"/>
+
+      <!-- Left finger: axis -y so a positive angle closes toward the centre. -->
+      <body name="left_prox" pos="-0.07 0 -0.01">
+        <joint name="left_mcp" class="finger" axis="0 -1 0"/>
+        <geom name="left_prox" class="finger" fromto="0 0 0 0 0 -0.06"/>
+        <body name="left_dist" pos="0 0 -0.06">
+          <joint name="left_pip" class="distal" axis="0 -1 0"/>
+          <geom name="left_dist" class="finger" fromto="0 0 0 0 0 -0.05"/>
+          <site name="left_tip" pos="0 0 -0.05" size="0.005"/>
+        </body>
+      </body>
+
+      <!-- Right finger: mirrored. -->
+      <body name="right_prox" pos="0.07 0 -0.01">
+        <joint name="right_mcp" class="finger" axis="0 1 0"/>
+        <geom name="right_prox" class="finger" fromto="0 0 0 0 0 -0.06"/>
+        <body name="right_dist" pos="0 0 -0.06">
+          <joint name="right_pip" class="distal" axis="0 1 0"/>
+          <geom name="right_dist" class="finger" fromto="0 0 0 0 0 -0.05"/>
+          <site name="right_tip" pos="0 0 -0.05" size="0.005"/>
+        </body>
+      </body>
+    </body>
+
+    <!-- Object to grasp. -->
+    <body name="object" pos="0 0 0.04">
+      <freejoint name="object"/>
+      <geom name="object" type="cylinder" size="0.03 0.04" rgba="0.2 0.6 0.9 1" mass="0.1"/>
+    </body>
+  </worldbody>
+
+  <tendon>
+    <!-- One tendon routed over all four joints = one degree of actuation. -->
+    <fixed name="flexor">
+      <joint joint="left_mcp" coef="1"/>
+      <joint joint="left_pip" coef="1"/>
+      <joint joint="right_mcp" coef="1"/>
+      <joint joint="right_pip" coef="1"/>
+    </fixed>
+  </tendon>
+
+  <actuator>
+    <position name="flexor" tendon="flexor" kp="1" ctrlrange="0 5.2" forcerange="-1.0 1.0"/>
+    <position name="lift" joint="lift" kp="400" kv="40" ctrlrange="-0.05 0.3"/>
+  </actuator>
+
+  <sensor>
+    <tendonpos name="flexor_pos" tendon="flexor"/>
+    <framepos name="object_pos" objtype="body" objname="object"/>
+  </sensor>
+</mujoco>

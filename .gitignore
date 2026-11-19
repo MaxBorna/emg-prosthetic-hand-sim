@@ -1,0 +1,35 @@
+# Data: NinaPro and derived features are never committed (license + size)
+data/*
+!data/README.md
+results/
+*.npz
+*.h5
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# MuJoCo / rendering output
+*.mp4
+*.gif
+MUJOCO_LOG.TXT
+
+# Trained models (large); keep small reference checkpoints in releases instead
+checkpoints/
+*.pt
+*.pth
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
