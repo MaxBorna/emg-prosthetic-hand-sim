@@ -5,7 +5,7 @@ An underactuated prosthetic hand controlled by surface EMG, developed simulation
 [NinaPro DB2](http://ninapro.hevs.ch/) dataset, with an optional path to real hardware
 (ESP32 + servos).
 
-> **Status:** Phase 0. Scripted grasp with a tendon-driven gripper works and is tested in CI.
+> **Status:** Phase 0 done (scripted grasp, CI). Phase 1 in progress: feature + LDA/SVM baseline on NinaPro DB2.
 
 ## Goal
 
@@ -82,7 +82,31 @@ fingers adapt to the object's shape without per-joint control. Because the tendo
 couples the two fingers, it can settle asymmetrically (one finger curls more), which is
 expected underactuated behaviour and something to evaluate rather than hide.
 
+## Phase 1: EMG baseline
+
+```bash
+python scripts/train_emg_baseline.py --subjects 1 2 3 --classes 0 18 32          # LDA
+python scripts/train_emg_baseline.py --subjects 1 2 3 --classes 0 18 32 --clf svm
+```
+
+Pipeline: band-pass 20–450 Hz + 50 Hz notch → 200 ms windows, 50 ms step → RMS/MAV/WL per
+channel (36 features) → standardise → LDA or RBF-SVM. Windows that straddle a label or
+repetition boundary are dropped, so train/test (repetitions 1,3,4,6 vs 2,5) never share data.
+
+First results, exercise 2, subjects 1–3, **balanced** accuracy (rest dominates the data, so
+plain accuracy is inflated):
+
+| Setup | Classes | Within-subject | Leave-one-subject-out |
+|---|---|---|---|
+| LDA | rest, large diameter, tip pinch | 72–89 % | 46–69 % |
+| SVM | rest, large diameter, tip pinch | 82–96 % | 36–40 % |
+| LDA | all 23 grasps + rest | 46–55 % | 7–10 % (chance 4 %) |
+
+Takeaways so far: grasp recognition works well when the model is calibrated on the user;
+it largely fails on an unseen subject, and the more flexible SVM overfits the training
+subjects worse than LDA. With only 2 training subjects in LOSO these numbers are noisy.
+
 ## Data and license
 
 Code: MIT (see `LICENSE`). NinaPro data is **not** included. Download it yourself under its
-own terms (see `data/README.md`).
+own terms (see `data/README.md`) and cite Atzori et al., *Scientific Data* 1, 140053 (2014).

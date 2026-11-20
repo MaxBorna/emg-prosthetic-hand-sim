@@ -1,3 +1,5 @@
-"""Evaluation: classification metrics, leave-one-subject-out splits,
-and grasp-success metrics for closed-loop runs.
-"""
+"""Evaluation: classification metrics and subject-wise splits."""
+
+from handsim.eval.metrics import summarize
+
+__all__ = ["summarize"]
