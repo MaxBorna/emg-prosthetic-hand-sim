@@ -1,0 +1,138 @@
+<!--
+  hand_v1: underactuated five-finger hand (15 finger joints, 4 hand actuators).
+
+  Actuation, as in many commercial myoelectric hands:
+    index_flex    one tendon over index MCP/PIP/DIP
+    fingers_flex  one tendon over middle, ring and little (9 joints): the three
+                  fingers adapt to the object independently of each other
+    thumb_flex    one tendon over thumb MCP/IP
+    thumb_rot     thumb rotation (CMC): 0 = lateral (beside the hand),
+                  ~1.57 = opposed (facing the fingers)
+  Fingers hang along -z, palm faces +y, flexion curls fingertips toward +y.
+  Included by the scene files (scene_power.xml, scene_pinch.xml).
+-->
+<mujoco model="hand_v1">
+  <default>
+    <default class="hand">
+      <geom friction="1.5 0.02 0.001" condim="4" solref="0.005 1" rgba="0.85 0.55 0.25 1"/>
+      <default class="phalanx">
+        <geom type="capsule" size="0.008" mass="0.01"/>
+      </default>
+      <default class="flex">
+        <joint type="hinge" axis="1 0 0" range="0 1.5" stiffness="0.01" damping="0.005" armature="0.0005"/>
+      </default>
+      <default class="flex_mid">
+        <joint type="hinge" axis="1 0 0" range="0 1.6" stiffness="0.02" damping="0.005" armature="0.0005"/>
+      </default>
+      <default class="flex_dist">
+        <joint type="hinge" axis="1 0 0" range="0 1.2" stiffness="0.03" damping="0.005" armature="0.0005"/>
+      </default>
+    </default>
+  </default>
+
+  <worldbody>
+    <body name="palm" pos="0 0 0.25" childclass="hand">
+      <joint name="lift" type="slide" axis="0 0 1" range="-0.05 0.3" damping="5"/>
+      <geom name="palm" type="box" size="0.04 0.01 0.045" rgba="0.3 0.3 0.35 1" mass="0.25"/>
+      
+      <body name="index_prox" pos="-0.027 0 -0.045">
+        <joint name="index_mcp" class="flex"/>
+        <geom class="phalanx" fromto="0 0 0 0 0 -0.045"/>
+        <body name="index_mid" pos="0 0 -0.045">
+          <joint name="index_pip" class="flex_mid"/>
+          <geom class="phalanx" fromto="0 0 0 0 0 -0.026"/>
+          <body name="index_dist" pos="0 0 -0.026">
+            <joint name="index_dip" class="flex_dist"/>
+            <geom class="phalanx" fromto="0 0 0 0 0 -0.02"/>
+            <site name="index_tip" pos="0 0 -0.02" size="0.004"/>
+          </body>
+        </body>
+      </body>
+      <body name="middle_prox" pos="-0.009 0 -0.045">
+        <joint name="middle_mcp" class="flex"/>
+        <geom class="phalanx" fromto="0 0 0 0 0 -0.049"/>
+        <body name="middle_mid" pos="0 0 -0.049">
+          <joint name="middle_pip" class="flex_mid"/>
+          <geom class="phalanx" fromto="0 0 0 0 0 -0.029"/>
+          <body name="middle_dist" pos="0 0 -0.029">
+            <joint name="middle_dip" class="flex_dist"/>
+            <geom class="phalanx" fromto="0 0 0 0 0 -0.021"/>
+            <site name="middle_tip" pos="0 0 -0.021" size="0.004"/>
+          </body>
+        </body>
+      </body>
+      <body name="ring_prox" pos="0.009 0 -0.045">
+        <joint name="ring_mcp" class="flex"/>
+        <geom class="phalanx" fromto="0 0 0 0 0 -0.046"/>
+        <body name="ring_mid" pos="0 0 -0.046">
+          <joint name="ring_pip" class="flex_mid"/>
+          <geom class="phalanx" fromto="0 0 0 0 0 -0.027"/>
+          <body name="ring_dist" pos="0 0 -0.027">
+            <joint name="ring_dip" class="flex_dist"/>
+            <geom class="phalanx" fromto="0 0 0 0 0 -0.02"/>
+            <site name="ring_tip" pos="0 0 -0.02" size="0.004"/>
+          </body>
+        </body>
+      </body>
+      <body name="little_prox" pos="0.027 0 -0.045">
+        <joint name="little_mcp" class="flex"/>
+        <geom class="phalanx" fromto="0 0 0 0 0 -0.036"/>
+        <body name="little_mid" pos="0 0 -0.036">
+          <joint name="little_pip" class="flex_mid"/>
+          <geom class="phalanx" fromto="0 0 0 0 0 -0.02"/>
+          <body name="little_dist" pos="0 0 -0.02">
+            <joint name="little_dip" class="flex_dist"/>
+            <geom class="phalanx" fromto="0 0 0 0 0 -0.018"/>
+            <site name="little_tip" pos="0 0 -0.018" size="0.004"/>
+          </body>
+        </body>
+      </body>
+
+      <!-- Thumb: metacarpal swings about z (rotation), phalanges hang and flex toward the palm. -->
+      <body name="thumb_meta" pos="-0.035 0.01 -0.01">
+        <joint name="thumb_cmc" type="hinge" axis="0 0 -1" range="0 1.6" damping="0.02" armature="0.001"/>
+        <geom class="phalanx" fromto="0 0 0 -0.055 0 0" size="0.009"/>
+        <body name="thumb_prox" pos="-0.055 0 0">
+          <joint name="thumb_mcp" class="flex" axis="0 -1 0"/>
+          <geom class="phalanx" fromto="0 0 0 0 0 -0.035"/>
+          <body name="thumb_dist" pos="0 0 -0.035">
+            <joint name="thumb_ip" class="flex_mid" axis="0 -1 0"/>
+            <geom class="phalanx" fromto="0 0 0 0 0 -0.028"/>
+            <site name="thumb_tip" pos="0 0 -0.028" size="0.004"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <tendon>
+    <fixed name="index_flex">
+      <joint joint="index_mcp" coef="1"/>
+      <joint joint="index_pip" coef="1"/>
+      <joint joint="index_dip" coef="1"/>
+    </fixed>
+    <fixed name="fingers_flex">
+      <joint joint="middle_mcp" coef="1"/>
+      <joint joint="middle_pip" coef="1"/>
+      <joint joint="middle_dip" coef="1"/>
+      <joint joint="ring_mcp" coef="1"/>
+      <joint joint="ring_pip" coef="1"/>
+      <joint joint="ring_dip" coef="1"/>
+      <joint joint="little_mcp" coef="1"/>
+      <joint joint="little_pip" coef="1"/>
+      <joint joint="little_dip" coef="1"/>
+    </fixed>
+    <fixed name="thumb_flex">
+      <joint joint="thumb_mcp" coef="1"/>
+      <joint joint="thumb_ip" coef="1"/>
+    </fixed>
+  </tendon>
+
+  <actuator>
+    <position name="index_flex" tendon="index_flex" kp="0.5" ctrlrange="0 4.3" forcerange="-0.4 0.4"/>
+    <position name="fingers_flex" tendon="fingers_flex" kp="0.5" ctrlrange="0 12.9" forcerange="-0.8 0.8"/>
+    <position name="thumb_flex" tendon="thumb_flex" kp="0.5" ctrlrange="0 3.1" forcerange="-0.4 0.4"/>
+    <position name="thumb_rot" joint="thumb_cmc" kp="2" kv="0.1" ctrlrange="0 1.6" forcerange="-1 1"/>
+    <position name="lift" joint="lift" kp="600" kv="60" ctrlrange="-0.05 0.3"/>
+  </actuator>
+</mujoco>
